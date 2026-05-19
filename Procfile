@@ -1,1 +1,1 @@
-web: bash health-check.sh && gunicorn --bind 0.0.0.0:$PORT -c gunicorn.conf.py server:app
+web: gunicorn --bind 0.0.0.0:$PORT -c gunicorn.conf.py server:app

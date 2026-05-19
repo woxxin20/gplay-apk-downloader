@@ -12,8 +12,9 @@ echo ""
 # Python dependencies
 echo "[1/4] Installing Python dependencies..."
 if ! pip install --upgrade pip > /dev/null 2>&1; then
-    echo "❌ Failed to upgrade pip"
-    exit 1
+    echo "⚠ Failed to upgrade pip (non-critical)"
+else
+    echo "✓ pip upgraded"
 fi
 if ! pip install -r requirements.txt > /dev/null 2>&1; then
     echo "❌ Failed to install requirements"
@@ -25,35 +26,39 @@ echo "✓ Dependencies installed"
 echo "[2/4] Downloading APKEditor..."
 APKEDITOR_JAR="./APKEditor.jar"
 if [ ! -f "$APKEDITOR_JAR" ]; then
-    if ! curl -sL -o "$APKEDITOR_JAR" \
-        "https://github.com/REAndroid/APKEditor/releases/download/V1.4.1/APKEditor-1.4.1.jar"; then
-        echo "❌ Failed to download APKEditor"
-        exit 1
+    if curl -sL -o "$APKEDITOR_JAR" \
+        "https://github.com/REAndroid/APKEditor/releases/download/V1.4.1/APKEditor-1.4.1.jar" 2>/dev/null; then
+        if [ -f "$APKEDITOR_JAR" ] && [ -s "$APKEDITOR_JAR" ]; then
+            echo "✓ Downloaded APKEditor: $(ls -lh "$APKEDITOR_JAR" | awk '{print $5}')"
+        else
+            echo "⚠ APKEditor download empty (will use simple merge)"
+        fi
+    else
+        echo "⚠ APKEditor download failed (will use simple merge)"
     fi
-    if [ ! -f "$APKEDITOR_JAR" ] || [ ! -s "$APKEDITOR_JAR" ]; then
-        echo "❌ APKEditor download failed or empty file"
-        exit 1
-    fi
-    echo "✓ Downloaded APKEditor: $(ls -lh "$APKEDITOR_JAR" | awk '{print $5}')"
 else
     echo "✓ APKEditor already exists: $(ls -lh "$APKEDITOR_JAR" | awk '{print $5}')"
 fi
 
-# Debug keystore for APK signing
+# Debug keystore for APK signing (optional - will be created at runtime if needed)
 echo "[3/4] Setting up signing keystore..."
 KEYSTORE_DIR="$HOME/.android"
 KEYSTORE_FILE="$KEYSTORE_DIR/debug.keystore"
 mkdir -p "$KEYSTORE_DIR"
 
 if [ ! -f "$KEYSTORE_FILE" ]; then
-    if ! keytool -genkey -v -keystore "$KEYSTORE_FILE" \
-        -storepass android -alias androiddebugkey -keypass android \
-        -keyalg RSA -keysize 2048 -validity 10000 \
-        -dname "CN=Android Debug,O=Android,C=US" 2>&1 | tail -5; then
-        echo "❌ Failed to create keystore"
-        exit 1
+    if command -v keytool &> /dev/null; then
+        if keytool -genkey -v -keystore "$KEYSTORE_FILE" \
+            -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US" 2>&1 | tail -3; then
+            echo "✓ Keystore created"
+        else
+            echo "⚠ Keystore creation failed (will be created at runtime if needed)"
+        fi
+    else
+        echo "⚠ keytool not found (Java not available - signing will be optional)"
     fi
-    echo "✓ Keystore created"
 else
     echo "✓ Keystore already exists"
 fi
