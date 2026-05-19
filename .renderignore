@@ -1,0 +1,46 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.venv
+venv
+env
+.Python
+
+# Local development
+server.log*
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode
+.idea
+
+# Build artifacts
+dist
+build
+*.egg
+
+# Test and coverage
+.pytest_cache
+.coverage
+htmlcov
+
+# Node (if frontend assets build)
+node_modules
+npm-debug.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Keep these for deployment
+!APKEditor.jar
+!public/
+!profiles/

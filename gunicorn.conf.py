@@ -2,6 +2,7 @@
 # Usage: gunicorn -c gunicorn.conf.py server:app
 
 import multiprocessing
+import os
 
 # Worker configuration
 # gevent provides async workers that handle SSE streaming well.
@@ -16,8 +17,9 @@ worker_connections = 1000
 timeout = 300  # 5 minutes
 graceful_timeout = 30
 
-# Server socket
-bind = '0.0.0.0:5000'
+# Server socket - use PORT env var for Render compatibility
+port = int(os.environ.get('PORT', 10000))
+bind = f'0.0.0.0:{port}'
 
 # Logging
 accesslog = '-'

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: gplay-downloader
+    runtime: python
+    pythonVersion: 3.12
+    buildCommand: bash build.sh
+    startCommand: gunicorn --bind 0.0.0.0:$PORT -c gunicorn.conf.py server:app
+    envVars:
+      - key: PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+        value: python
+      - key: LOG_LEVEL
+        value: info
+      - key: PYTHONUNBUFFERED
+        value: "1"
